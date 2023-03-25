@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import * as EmailValidator from 'email-validator';
 import AuthedContext from "./AuthedContext";
 
 function Account() {
@@ -7,6 +8,9 @@ function Account() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
   const toggleLogInPage = () => {
     setUseLogInPage(prev => !prev);
@@ -16,11 +20,78 @@ function Account() {
   }
 
   const logIn = () => {
-    setAuthed(true);
+    if(!EmailValidator.validate(email)) {
+      return setEmailError('Invalid email');
+    }
+    else if(emailError !== '') {
+      setEmailError('');
+    }
+
+    fetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    })
+      .then(res => res.text())
+      .then(text => {
+        if(text === 'OK') {
+          return setAuthed(true);
+        }
+        else if(text === 'Email does not exist') {
+          return setEmailError('No account with this email exists');
+        }
+        else if(text === 'Wrong password') {
+          return setPasswordError('Incorrect password');
+        }
+        else {
+          return console.log(text);
+        }
+      })
   }
 
   const signUp = () => {
+    if(!EmailValidator.validate(email)) {
+      return setEmailError('Invalid email');
+    }
+    else if(emailError !== '') {
+      setEmailError('');
+    }
 
+    if(password.length < 8) {
+      return setPasswordError('Password must be at least 8 characters');
+    }
+    else if(passwordError !== '') {
+      setPasswordError('');
+    }
+
+    if(password !== confirmPassword) {
+      return setConfirmPasswordError('Passwords don\'t match');
+    }
+    else if(confirmPasswordError !== '') {
+      setConfirmPasswordError('');
+    }
+
+    fetch('/api/signup', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    })
+      .then(res => res.text())
+      .then(text => {
+        if(text === 'OK') {
+          return setAuthed(true);
+        }
+        else if(text === 'Email already exists') {
+          return setEmailError('Account with this email already exists');
+        }
+        else {
+          return console.log(text);
+        }
+      })
   }
 
   const authWithGoogle = () => {
@@ -35,14 +106,17 @@ function Account() {
           <div className='mb-4'>
             <label htmlFor='email' className='form-label'>Email address</label>
             <input value={email} onChange={e => setEmail(e.target.value)} type='email' className='form-control' id='email'/>
+            {emailError !== '' && <p className='account-error mb-0 text-danger'>{emailError}</p>}
           </div>
           <div className='mb-4'>
             <label htmlFor='password' className='form-label'>Password</label>
             <input value={password} onChange={e => setPassword(e.target.value)} type='password' className='form-control' id='password'/>
+            {passwordError !== '' && <p className='account-error mb-0 text-danger'>{passwordError}</p>}
           </div>
           {!useLogInPage && <div className='mb-4'>
             <label htmlFor='password' className='form-label'>Confirm password</label>
             <input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} type='password' className='form-control' id='password'/>
+            {confirmPasswordError !== '' && <p className='account-error mb-0 text-danger'>{confirmPasswordError}</p>}
           </div>}
           <button onClick={useLogInPage ? logIn : signUp} className='btn btn-primary'>
             {useLogInPage ? 'Log in' : 'Sign up'}

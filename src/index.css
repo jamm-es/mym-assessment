@@ -39,6 +39,10 @@ code {
   background-color: var(--color-main);
 }
 
+.account-error {
+  font-size: 0.75rem;
+}
+
 .account-divider {
   grid-template-columns: 1fr min-content 1fr;
 }
