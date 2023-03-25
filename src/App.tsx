@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import ImageViewer from './ImageViewer';
+import Account from "./Account";
+import AuthedContext from "./AuthedContext";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+  const [authed, setAuthed] = useState(false);
+
+  return <AuthedContext.Provider value={{ authed, setAuthed }}>
+    <div className={`background overflow-y-hidden ${authed && 'authed'} position-fixed w-100 d-flex justify-content-center align-items-center flex-column p-3`}>
+      <div className='p-2 fw-bold text-white'>
+        NASA Image Viewer
+      </div>
+      <Account />
     </div>
-  );
+    <ImageViewer />
+  </AuthedContext.Provider>
 }
 
 export default App;
