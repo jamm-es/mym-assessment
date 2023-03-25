@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch';
+import * as bcrypt from 'bcrypt';
 
 export default function handler(request: VercelRequest, response: VercelResponse) {
   if(request.method !== 'POST') {
@@ -17,7 +18,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Request-Headers': '*',
-      'api-key': process.env.MONGODB_DATA_API_KEY!
+      'api-key': process.env.REACT_APP_MONGODB_DATA_API_KEY!
     },
     body: JSON.stringify({
       collection: 'users',
@@ -34,12 +35,14 @@ export default function handler(request: VercelRequest, response: VercelResponse
         return response.status(400).end('Email already exists')
       }
 
+      const saltedPass = bcrypt.hashSync(reqData.password, 10);
+
       fetch('https://us-west-2.aws.data.mongodb-api.com/app/data-gvzkb/endpoint/data/v1/action/insertOne', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Request-Headers': '*',
-          'api-key': process.env.MONGODB_DATA_API_KEY!
+          'api-key': process.env.REACT_APP_MONGODB_DATA_API_KEY!
         },
         body: JSON.stringify({
           collection: 'users',
@@ -47,7 +50,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
           dataSource: "mym-assessment",
           document: {
             email: reqData.email,
-            password: reqData.password
+            password: saltedPass
           }
         })
       })

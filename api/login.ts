@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch';
+import * as bcrypt from 'bcrypt';
 
 export default function handler(request: VercelRequest, response: VercelResponse) {
   if(request.method !== 'POST') {
@@ -17,7 +18,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Request-Headers': '*',
-      'api-key': process.env.MONGODB_DATA_API_KEY!
+      'api-key': process.env.REACT_APP_MONGODB_DATA_API_KEY!
     },
     body: JSON.stringify({
       collection: 'users',
@@ -34,7 +35,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
         return response.status(400).end('Email does not exist');
       }
 
-      if(data.document.password !== reqData.password) {
+      if(!bcrypt.compareSync(reqData.password, data.document.password)) {
         return response.status(400).end('Wrong password');
       }
 

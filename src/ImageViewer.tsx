@@ -17,10 +17,9 @@ function ImageViewer() {
   const [imageData, setImageData] = useState<APODData | null>(null);
 
   useEffect(() => {
-    console.log(process.env);
     fetch('https://api.nasa.gov/planetary/apod?' + new URLSearchParams({
       date: date.toISOString().substring(0, 10),
-      api_key: process.env.NASA_API_KEY!
+      api_key: process.env.REACT_APP_NASA_API_KEY!
     }))
       .then(res => {
         return res.status === 200 ? res.json() : null;

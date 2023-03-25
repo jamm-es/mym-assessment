@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import * as EmailValidator from 'email-validator';
 import AuthedContext from "./AuthedContext";
 
@@ -11,12 +11,16 @@ function Account() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleLogInPage = () => {
     setUseLogInPage(prev => !prev);
     setEmail('');
+    setEmailError('');
     setPassword('');
+    setPasswordError('');
     setConfirmPassword('');
+    setConfirmPasswordError('');
   }
 
   const logIn = () => {
@@ -27,6 +31,8 @@ function Account() {
       setEmailError('');
     }
 
+    setIsLoading(true);
+    console.log(isLoading);
     fetch('/api/login', {
       method: 'POST',
       body: JSON.stringify({
@@ -36,6 +42,8 @@ function Account() {
     })
       .then(res => res.text())
       .then(text => {
+        setIsLoading(false);
+
         if(text === 'OK') {
           return setAuthed(true);
         }
@@ -73,6 +81,7 @@ function Account() {
       setConfirmPasswordError('');
     }
 
+    setIsLoading(true);
     fetch('/api/signup', {
       method: 'POST',
       body: JSON.stringify({
@@ -82,6 +91,8 @@ function Account() {
     })
       .then(res => res.text())
       .then(text => {
+        setIsLoading(false);
+
         if(text === 'OK') {
           return setAuthed(true);
         }
@@ -94,12 +105,15 @@ function Account() {
       })
   }
 
-  const authWithGoogle = () => {
-
-  }
+  useEffect(() => {
+    // @ts-ignore
+    window.authedWithGoogle = () => {
+      setAuthed(true);
+    }
+  })
 
   return <div className='account w-100'>
-    <div className='card'>
+    <div className='card mt-3'>
       <div className='card-body'>
         <h5 className='card-title'>{useLogInPage ? 'Log in' : 'Sign up'}</h5>
         <div>
@@ -118,8 +132,8 @@ function Account() {
             <input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} type='password' className='form-control' id='password'/>
             {confirmPasswordError !== '' && <p className='account-error mb-0 text-danger'>{confirmPasswordError}</p>}
           </div>}
-          <button onClick={useLogInPage ? logIn : signUp} className='btn btn-primary'>
-            {useLogInPage ? 'Log in' : 'Sign up'}
+          <button onClick={isLoading ? () => {} : useLogInPage ? logIn : signUp} className='btn btn-primary'>
+            {useLogInPage ? 'Log in' : 'Sign up'} {isLoading && <i className="fa-solid fa-rotate spin ms-2" />}
           </button>
         </div>
         <div className='d-flex align-items-center my-3'>
@@ -128,9 +142,21 @@ function Account() {
           <hr className='flex-grow-1 m-0'/>
         </div>
         <div className='d-flex justify-content-center'>
-          <button onClick={authWithGoogle} className='btn btn-outline-secondary'>
-            <i className="fa-brands fa-google me-2"></i>{useLogInPage ? 'Log in' : 'Sign up'} with Google
-          </button>
+          <div id="g_id_onload"
+               data-client_id="1051248082405-gmlao6v75cac0bhoenj3pggeploj4a8a.apps.googleusercontent.com"
+               data-context="signin"
+               data-ux_mode="popup"
+               data-callback="authedWithGoogle"
+               data-auto_prompt="false">
+          </div>
+          <div className="g_id_signin"
+               data-type="standard"
+               data-shape="rectangular"
+               data-theme="outline"
+               data-text="continue_with"
+               data-size="large"
+               data-logo_alignment="left">
+          </div>
         </div>
       </div>
     </div>
