@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import * as EmailValidator from 'email-validator';
 import AuthedContext from "./AuthedContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Account() {
   const { setAuthed } = useContext(AuthedContext);
@@ -13,6 +14,7 @@ function Account() {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // toggles between sign up and log in page
   const toggleLogInPage = () => {
     setUseLogInPage(prev => !prev);
     setEmail('');
@@ -23,6 +25,7 @@ function Account() {
     setConfirmPasswordError('');
   }
 
+  // handles API call to /api/login, and auths if it was successful - atherwise sets appropriate errors
   const logIn = () => {
     if(!EmailValidator.validate(email)) {
       return setEmailError('Invalid email');
@@ -59,6 +62,7 @@ function Account() {
       })
   }
 
+  // handles signup call to /api/signup - also auths if successful - atherwise sets appropriate errors
   const signUp = () => {
     if(!EmailValidator.validate(email)) {
       return setEmailError('Invalid email');
@@ -105,13 +109,6 @@ function Account() {
       })
   }
 
-  useEffect(() => {
-    // @ts-ignore
-    window.authedWithGoogle = () => {
-      setAuthed(true);
-    }
-  })
-
   return <div className='account w-100'>
     <div className='card mt-3'>
       <div className='card-body'>
@@ -142,21 +139,13 @@ function Account() {
           <hr className='flex-grow-1 m-0'/>
         </div>
         <div className='d-flex justify-content-center'>
-          <div id="g_id_onload"
-               data-client_id="1051248082405-gmlao6v75cac0bhoenj3pggeploj4a8a.apps.googleusercontent.com"
-               data-context="signin"
-               data-ux_mode="popup"
-               data-callback="authedWithGoogle"
-               data-auto_prompt="false">
-          </div>
-          <div className="g_id_signin"
-               data-type="standard"
-               data-shape="rectangular"
-               data-theme="outline"
-               data-text="continue_with"
-               data-size="large"
-               data-logo_alignment="left">
-          </div>
+          <GoogleLogin
+            onSuccess={() => {
+              setAuthed(true);
+            }}
+            onError={() => {
+            }}
+          />
         </div>
       </div>
     </div>

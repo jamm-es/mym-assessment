@@ -13,6 +13,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
     return response.status(400).end('Does not include email or password in request');
   }
 
+  // fetches user with email to check if account already exists
   fetch('https://us-west-2.aws.data.mongodb-api.com/app/data-gvzkb/endpoint/data/v1/action/findOne', {
     method: 'POST',
     headers: {
@@ -35,8 +36,8 @@ export default function handler(request: VercelRequest, response: VercelResponse
         return response.status(400).end('Email already exists')
       }
 
+      // inserts new user into database with salted password
       const saltedPass = bcrypt.hashSync(reqData.password, 10);
-
       fetch('https://us-west-2.aws.data.mongodb-api.com/app/data-gvzkb/endpoint/data/v1/action/insertOne', {
         method: 'POST',
         headers: {
@@ -54,7 +55,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
           }
         })
       })
-        .then(res => {
+        .then(() => {
           return response.status(200).end('OK');
         })
     })

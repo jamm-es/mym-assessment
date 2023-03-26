@@ -14,6 +14,9 @@ function App() {
       <Account />
     </div>
     <ImageViewer />
+    {authed && <div className='position-fixed bottom-0 end-0 p-3'>
+      <a onClick={() => setAuthed(false)} style={{ cursor: 'pointer' }} className='text-decoration-underline text-secondary'>log out</a>
+    </div>}
   </AuthedContext.Provider>
 }
 

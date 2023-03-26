@@ -13,6 +13,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
     return response.status(400).end('Does not include email or password in request');
   }
 
+  // finds user given email address
   fetch('https://us-west-2.aws.data.mongodb-api.com/app/data-gvzkb/endpoint/data/v1/action/findOne', {
     method: 'POST',
     headers: {
@@ -35,6 +36,7 @@ export default function handler(request: VercelRequest, response: VercelResponse
         return response.status(400).end('Email does not exist');
       }
 
+      // compares password using bcrypt rather than plain text comparison
       if(!bcrypt.compareSync(reqData.password, data.document.password)) {
         return response.status(400).end('Wrong password');
       }
